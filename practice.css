@@ -1,3 +1,4 @@
+
 :root {
     --primary-color: #ff4d6d;
     --secondary-color: #ff8fa3;
@@ -779,6 +780,72 @@ padding:25px;
 .letter-box{
 width:90%;
 padding:20px;
+}
+
+}
+
+/* Fix love letter on mobile */
+
+@media (max-width:768px){
+
+.letter{
+
+align-items:flex-start;   /* start from top instead of center */
+overflow-y:auto;          /* allow scrolling */
+padding-top:40px;
+
+}
+
+.letter-box{
+
+margin:20px;
+max-height:90vh;
+overflow-y:auto;
+
+}
+
+}
+.letter-box p{
+line-height:1.8;
+font-size:1.05rem;
+}
+
+body.no-scroll{
+overflow: hidden;
+}
+
+.yes-title{
+font-family:'Great Vibes', cursive;
+font-size:3.5rem;
+color:#c9184a;
+text-align:center;
+margin-bottom:10px;
+animation:popLove 1.2s ease;
+}
+
+.yes-subtitle{
+font-size:1.2rem;
+color:#590d22;
+text-align:center;
+margin-bottom:25px;
+}
+
+/* soft romantic pop animation */
+
+@keyframes popLove{
+
+0%{
+transform:scale(0.6);
+opacity:0;
+}
+
+60%{
+transform:scale(1.1);
+}
+
+100%{
+transform:scale(1);
+opacity:1;
 }
 
 }
