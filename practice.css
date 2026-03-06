@@ -15,12 +15,13 @@
 }
 
 body {
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    font-family: var(--font-body);
-    background: var(--bg-gradient);
-    user-select: none;
+width: 100vw;
+min-height: 100vh;
+overflow-x: hidden;
+overflow-y: auto;
+font-family: var(--font-body);
+background: var(--bg-gradient);
+user-select: none;
 }
 
 #game-container {
@@ -731,6 +732,53 @@ padding:25px;
 
 .slide{
 width:95%;
+}
+
+}
+
+@media (max-width:768px){
+
+body{
+overflow-y:auto;
+}
+
+.screen{
+padding:20px;
+}
+
+h1{
+font-size:2.2rem;
+}
+
+#proposal-text{
+font-size:1.4rem;
+padding:0 10px;
+}
+
+.buttons{
+flex-direction:column;
+gap:15px;
+}
+
+.photo-gallery{
+flex-direction:column;
+align-items:center;
+gap:15px;
+}
+
+.memory-photo{
+width:85%;
+height:auto;
+}
+
+.celebration-card{
+width:90%;
+padding:25px;
+}
+
+.letter-box{
+width:90%;
+padding:20px;
 }
 
 }
