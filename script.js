@@ -1,332 +1,415 @@
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-// Game State
-let gameState = 'START'; // START, PLAYING, WON, PROPOSAL, END
+let gameState = 'START';
 let score = 0;
-const WIN_SCORE = 15; // Hearts needed to fill the meter
+const WIN_SCORE = 15;
+
 let player;
 let hearts = [];
-let particles = []; // For effects
+let particles = [];
 let animationId;
-let loveMeter = document.getElementById('love-fill');
 
-// DOM Elements
+const loveMeter = document.getElementById('love-fill');
+
 const startScreen = document.getElementById('start-screen');
 const proposalScreen = document.getElementById('proposal-screen');
 const celebrationScreen = document.getElementById('celebration-screen');
+
 const startBtn = document.getElementById('start-btn');
 const yesBtn = document.getElementById('yes-btn');
 const noBtn = document.getElementById('no-btn');
 
-// Resize Handling
-function resize() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    if (player) {
-         player.y = canvas.height - 100;
-    }
+const ringBox = document.getElementById("ringBox");
+const ring = document.getElementById("ring");
+const proposalText = document.getElementById("proposal-text");
+const proposalButtons = document.getElementById("proposal-buttons");
+
+/* ---------------- RESIZE ---------------- */
+
+function resize(){
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+if(player){
+player.y = canvas.height - 100;
 }
-window.addEventListener('resize', resize);
-
-// Player Object
-class Player {
-    constructor() {
-        this.w = 100; // width
-        this.h = 80;  // height
-        this.x = canvas.width / 2 - this.w / 2;
-        this.y = canvas.height - 100;
-        this.speed = 10;
-        this.dx = 0;
-    }
-
-    draw() {
-        // Draw a cute basket or cup (using simple shapes for now, can be improved or replaced with image)
-        ctx.fillStyle = '#ff4d6d';
-        
-        // Simple semi-circle basket
-        ctx.beginPath();
-        ctx.arc(this.x + this.w/2, this.y, this.w/2, 0, Math.PI, false);
-        ctx.fill();
-        
-        // Handle
-        ctx.beginPath();
-        ctx.strokeStyle = '#c9184a';
-        ctx.lineWidth = 5;
-        ctx.arc(this.x + this.w/2, this.y - 10, this.w/2, Math.PI, 0, false);
-        ctx.stroke();
-    }
-
-    update() {
-        this.x += this.dx;
-        
-        // Boundaries
-        if (this.x < 0) this.x = 0;
-        if (this.x + this.w > canvas.width) this.x = canvas.width - this.w;
-    }
 }
 
-// Heart Object
-class Heart {
-    constructor() {
-        this.size = Math.random() * 20 + 20; // 20-40px
-        this.x = Math.random() * (canvas.width - this.size);
-        this.y = -this.size;
-        this.speed = Math.random() * 3 + 2; // 2-5 speed
-        this.color = `hsl(${Math.random() * 20 + 340}, 100%, 60%)`; // Pinkish/Red variations
-    }
+window.addEventListener("resize",resize);
 
-    draw() {
-        ctx.fillStyle = this.color;
-        ctx.beginPath();
-        let topCurveHeight = this.size * 0.3;
-        ctx.moveTo(this.x, this.y + topCurveHeight);
-        // top left curve
-        ctx.bezierCurveTo(
-            this.x, this.y, 
-            this.x - this.size / 2, this.y, 
-            this.x - this.size / 2, this.y + topCurveHeight
-        );
-        // bottom left curve
-        ctx.bezierCurveTo(
-            this.x - this.size / 2, this.y + (this.size + topCurveHeight) / 2, 
-            this.x, this.y + (this.size + topCurveHeight) / 2, 
-            this.x, this.y + this.size
-        );
-        // bottom right curve
-        ctx.bezierCurveTo(
-            this.x, this.y + (this.size + topCurveHeight) / 2, 
-            this.x + this.size / 2, this.y + (this.size + topCurveHeight) / 2, 
-            this.x + this.size / 2, this.y + topCurveHeight
-        );
-        // top right curve
-        ctx.bezierCurveTo(
-            this.x + this.size / 2, this.y, 
-            this.x, this.y, 
-            this.x, this.y + topCurveHeight
-        );
-        ctx.fill();
-    }
+/* ---------------- PLAYER ---------------- */
 
-    update() {
-        this.y += this.speed;
-    }
+class Player{
+
+constructor(){
+
+this.w = 100;
+this.h = 80;
+
+this.x = canvas.width/2 - this.w/2;
+this.y = canvas.height - 100;
+
 }
 
-// Particle Effect
-class Particle {
-    constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.size = Math.random() * 5 + 2;
-        this.speedX = (Math.random() - 0.5) * 4;
-        this.speedY = (Math.random() - 0.5) * 4;
-        this.life = 100;
-        this.color = `rgba(255, 255, 255, 0.8)`;
-    }
-    update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        this.life -= 2;
-    }
-    draw() {
-        ctx.fillStyle = this.color;
-        ctx.globalAlpha = this.life / 100;
-        ctx.beginPath();
-        ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-        ctx.fill();
-        ctx.globalAlpha = 1;
-    }
+draw(){
+
+ctx.fillStyle = "#ff4d6d";
+
+ctx.beginPath();
+ctx.arc(this.x + this.w/2,this.y,this.w/2,0,Math.PI);
+ctx.fill();
+
 }
 
-// Input Handling
-function handleInput(e) {
-    if (!player) return;
-    
-    // Mouse / Touch
-    if (e.type === 'mousemove' || e.type === 'touchmove') {
-        const clientX = e.type === 'mousemove' ? e.clientX : e.touches[0].clientX;
-        player.x = clientX - player.w / 2;
-    }
+update(){
+
+if(this.x < 0) this.x = 0;
+if(this.x + this.w > canvas.width)
+this.x = canvas.width - this.w;
+
 }
 
-window.addEventListener('mousemove', handleInput);
-window.addEventListener('touchmove', handleInput, { passive: false });
-
-// Game Functions
-function spawnHeart() {
-    if (Math.random() < 0.02) {
-        hearts.push(new Heart());
-    }
 }
 
-function updateGame() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height); // Clear canvas
+/* ---------------- HEART ---------------- */
 
-    if (gameState === 'PLAYING') {
-        player.update();
-        player.draw();
+class Heart{
 
-        spawnHeart();
+constructor(){
 
-        hearts.forEach((heart, index) => {
-            heart.update();
-            heart.draw();
+this.size = Math.random()*20+20;
+this.x = Math.random()*(canvas.width-this.size);
+this.y = -this.size;
+this.speed = Math.random()*3+2;
 
-            // Collision Detection
-            // Simple box-ish collision for now
-            if (
-                heart.y + heart.size > player.y &&
-                heart.x > player.x &&
-                heart.x < player.x + player.w
-            ) {
-                // Catch!
-                hearts.splice(index, 1);
-                score++;
-                createParticles(heart.x, heart.y);
-                updateScore();
-                
-                if (score >= WIN_SCORE) {
-                    triggerProposal();
-                }
-            } else if (heart.y > canvas.height) {
-                hearts.splice(index, 1); // Missed
-            }
-        });
-
-        particles.forEach((p, idx) => {
-            p.update();
-            p.draw();
-            if (p.life <= 0) particles.splice(idx, 1);
-        });
-    }
-
-    animationId = requestAnimationFrame(updateGame);
 }
 
-function createParticles(x, y) {
-    for(let i=0; i<5; i++) {
-        particles.push(new Particle(x, y));
-    }
+draw(){
+
+ctx.fillStyle="#ff4d6d";
+
+ctx.beginPath();
+
+ctx.moveTo(this.x,this.y+10);
+
+ctx.bezierCurveTo(this.x,this.y,this.x-15,this.y,this.x-15,this.y+10);
+ctx.bezierCurveTo(this.x-15,this.y+25,this.x,this.y+25,this.x,this.y+40);
+ctx.bezierCurveTo(this.x,this.y+25,this.x+15,this.y+25,this.x+15,this.y+10);
+ctx.bezierCurveTo(this.x+15,this.y,this.x,this.y,this.x,this.y+10);
+
+ctx.fill();
+
 }
 
-function updateScore() {
-    const percentage = (score / WIN_SCORE) * 100;
-    loveMeter.style.width = `${percentage}%`;
+update(){
+this.y += this.speed;
 }
 
-function triggerProposal() {
-    gameState = 'PROPOSAL';
-    // Small delay to let the particle effect finish or just smooth transition
-    setTimeout(() => {
-        proposalScreen.classList.remove('hidden');
-        proposalScreen.classList.add('active');
-        // Stop the loop or keep it running for background? 
-        // Let's keep loop for maybe background falling hearts but pause spawning
-    }, 500);
 }
 
-function startGame() {
-    resize();
-    player = new Player();
-    hearts = [];
-    score = 0;
-    updateScore();
-    gameState = 'PLAYING';
-    
-    startScreen.classList.remove('active');
-    startScreen.classList.add('hidden');
-    
-    updateGame();
+/* ---------------- PARTICLES ---------------- */
+
+class Particle{
+
+constructor(x,y){
+
+this.x=x;
+this.y=y;
+
+this.size=Math.random()*5+2;
+
+this.speedX=(Math.random()-0.5)*4;
+this.speedY=(Math.random()-0.5)*4;
+
+this.life=100;
+
 }
 
-// Event Listeners
-startBtn.addEventListener('click', startGame);
+update(){
 
-yesBtn.addEventListener('click', () => {
+this.x+=this.speedX;
+this.y+=this.speedY;
+this.life-=2;
 
-    proposalScreen.classList.remove('active');
-    proposalScreen.classList.add('hidden');
-
-    celebrationScreen.classList.remove('hidden');
-    celebrationScreen.classList.add('active');
-
-    // Show girlfriend photos
-    const gallery = document.getElementById("photo-gallery");
-    gallery.classList.remove("hidden");
-
-});
-// "No" button runs away
-noBtn.addEventListener('mouseover', moveNoButton);
-noBtn.addEventListener('touchstart', moveNoButton);
-
-function moveNoButton() {
-    const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-    const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
-    noBtn.style.position = 'fixed';
-    noBtn.style.left = `${x}px`;
-    noBtn.style.top = `${y}px`;
 }
 
-function triggerConfetti() {
-    // Simple confetti effect using particles or similar
-    // We can just reuse the heat/particle engine or add a simple CSS class to body
-    // For now, let's just let it be.
+draw(){
+
+ctx.fillStyle="white";
+
+ctx.globalAlpha=this.life/100;
+
+ctx.beginPath();
+ctx.arc(this.x,this.y,this.size,0,Math.PI*2);
+ctx.fill();
+
+ctx.globalAlpha=1;
+
 }
 
-// Initialize
-resize();
+}
+
+/* ---------------- INPUT ---------------- */
+
+function handleInput(e){
+
+if(!player) return;
+
+let clientX = e.type==="mousemove"
+? e.clientX
+: e.touches[0].clientX;
+
+player.x = clientX - player.w/2;
+
+}
+
+/* prevent mobile scroll */
+
+window.addEventListener("touchmove",(e)=>{
+if(gameState==="PLAYING"){
+e.preventDefault();
+handleInput(e);
+}
+},{passive:false});
+
+window.addEventListener("mousemove",handleInput);
+
+/* ---------------- GAME ---------------- */
+
+function spawnHeart(){
+
+if(Math.random()<0.02){
+hearts.push(new Heart());
+}
+
+}
+
+function createParticles(x,y){
+
+for(let i=0;i<5;i++){
+particles.push(new Particle(x,y));
+}
+
+}
+
+function updateScore(){
+
+let percent = (score/WIN_SCORE)*100;
+loveMeter.style.width = percent + "%";
+
+}
+
+function triggerProposal(){
+
+gameState="PROPOSAL";
+
+/* allow scrolling again */
+document.body.style.overflow="auto";
+
+setTimeout(()=>{
+
+proposalScreen.classList.remove("hidden");
+proposalScreen.classList.add("active");
+
+},500);
+
+}
+
+function updateGame(){
+
+ctx.clearRect(0,0,canvas.width,canvas.height);
+
+if(gameState==="PLAYING"){
+
+player.update();
+player.draw();
+
+spawnHeart();
+
+hearts.forEach((heart,index)=>{
+
+heart.update();
+heart.draw();
+
+if(
+
+heart.y+heart.size>player.y &&
+heart.x>player.x &&
+heart.x<player.x+player.w
+
+){
+
+hearts.splice(index,1);
+
+score++;
+
+createParticles(heart.x,heart.y);
+
 updateScore();
 
-/* Confetti + photo animation when YES clicked */
-yesBtn.addEventListener('click', () => {
+if(score>=WIN_SCORE){
+triggerProposal();
+}
 
-    proposalScreen.classList.add('hidden');
+}
 
-    celebrationScreen.classList.remove('hidden');
-    celebrationScreen.classList.add('active');
-
-    /* Show photos with animation */
-    showPhotos();
-
-    /* Start music */
-    const music = document.getElementById("romantic-music");
-    music.play();
-
-    /* Start petals */
-    startPetals();
-
-    /* Start hearts */
-    startHearts();
-
-    /* Start confetti */
-    confettiExplosion();
-
-    /* Start slideshow */
-    startSlideshow();
+if(heart.y>canvas.height){
+hearts.splice(index,1);
+}
 
 });
-/* Photos appear one by one */
+
+particles.forEach((p,i)=>{
+
+p.update();
+p.draw();
+
+if(p.life<=0) particles.splice(i,1);
+
+});
+
+}
+
+animationId=requestAnimationFrame(updateGame);
+
+}
+
+/* ---------------- START GAME ---------------- */
+
+function startGame(){
+
+resize();
+
+player=new Player();
+
+hearts=[];
+score=0;
+
+updateScore();
+
+gameState="PLAYING";
+
+startScreen.classList.add("hidden");
+
+/* disable scrolling during game */
+document.body.style.overflow="hidden";
+
+updateGame();
+
+}
+
+startBtn.addEventListener("click",startGame);
+
+/* ---------------- RING BOX ---------------- */
+
+if(ringBox){
+
+ringBox.addEventListener("click",()=>{
+
+ringBox.classList.add("open");
+
+setTimeout(()=>{
+ring.classList.remove("hidden");
+createSparkles();
+},400);
+
+setTimeout(()=>{
+proposalText.classList.remove("hidden");
+proposalText.classList.add("show");
+},900);
+
+setTimeout(()=>{
+proposalButtons.classList.remove("hidden");
+},1200);
+
+});
+
+}
+
+/* ---------------- SPARKLES ---------------- */
+
+function createSparkles(){
+
+const sparkles=document.getElementById("sparkles");
+
+setInterval(()=>{
+
+const star=document.createElement("div");
+
+star.className="sparkle";
+star.innerHTML="✨";
+
+star.style.left=Math.random()*100+"%";
+star.style.top=Math.random()*100+"%";
+
+sparkles.appendChild(star);
+
+setTimeout(()=>star.remove(),1200);
+
+},300);
+
+}
+
+/* ---------------- YES BUTTON ---------------- */
+
+yesBtn.addEventListener("click",()=>{
+
+proposalScreen.classList.add("hidden");
+
+celebrationScreen.classList.remove("hidden");
+celebrationScreen.classList.add("active");
+
+showPhotos();
+startHearts();
+confettiExplosion();
+startPetals();
+
+const music=document.getElementById("romantic-music");
+if(music) music.play();
+
+});
+
+/* ---------------- NO BUTTON ---------------- */
+
+noBtn.addEventListener("mouseover",moveNoButton);
+noBtn.addEventListener("touchstart",moveNoButton);
+
+function moveNoButton(){
+
+const x=Math.random()*(window.innerWidth-noBtn.offsetWidth);
+const y=Math.random()*(window.innerHeight-noBtn.offsetHeight);
+
+noBtn.style.position="fixed";
+noBtn.style.left=x+"px";
+noBtn.style.top=y+"px";
+
+}
+
+/* ---------------- PHOTO ANIMATION ---------------- */
 
 function showPhotos(){
 
-const photos = document.querySelectorAll(".memory-photo");
+const photos=document.querySelectorAll(".memory-photo");
 
 photos.forEach((photo,index)=>{
+
 setTimeout(()=>{
 photo.classList.add("show");
 },index*700);
+
 });
 
 }
 
-/* Floating hearts */
+/* ---------------- FLOATING HEARTS ---------------- */
 
 function startHearts(){
 
 setInterval(()=>{
 
-const heart = document.createElement("div");
+const heart=document.createElement("div");
+
 heart.className="floating-heart";
 heart.innerHTML="❤️";
 
@@ -335,15 +418,13 @@ heart.style.top=window.innerHeight+"px";
 
 document.body.appendChild(heart);
 
-setTimeout(()=>{
-heart.remove();
-},4000);
+setTimeout(()=>heart.remove(),4000);
 
 },400);
 
 }
 
-/* Confetti */
+/* ---------------- CONFETTI ---------------- */
 
 function confettiExplosion(){
 
@@ -354,7 +435,9 @@ const confetti=document.createElement("div");
 confetti.style.position="fixed";
 confetti.style.width="8px";
 confetti.style.height="8px";
+
 confetti.style.background=`hsl(${Math.random()*360},100%,60%)`;
+
 confetti.style.left=Math.random()*window.innerWidth+"px";
 confetti.style.top="-10px";
 
@@ -368,41 +451,7 @@ setTimeout(()=>confetti.remove(),3000);
 
 }
 
-/* Love letter popup */
-
-const letterBtn=document.getElementById("letter-btn");
-const letter=document.getElementById("love-letter");
-const closeLetter=document.getElementById("close-letter");
-
-letterBtn.addEventListener("click",()=>{
-letter.classList.remove("hidden");
-});
-
-closeLetter.addEventListener("click",()=>{
-letter.classList.add("hidden");
-});
-
-yesBtn.addEventListener('click', () => {
-
-proposalScreen.classList.add('hidden');
-
-celebrationScreen.classList.remove('hidden');
-celebrationScreen.classList.add('active');
-
-const gallery = document.getElementById("photo-gallery");
-gallery.classList.remove("hidden");
-
-/* Start music */
-const music = document.getElementById("romantic-music");
-music.play();
-
-/* Start rose petals */
-startPetals();
-
-/* Start slideshow */
-startSlideshow();
-
-});
+/* ---------------- ROSE PETALS ---------------- */
 
 function startPetals(){
 
@@ -417,76 +466,27 @@ petal.style.left=Math.random()*window.innerWidth+"px";
 
 document.body.appendChild(petal);
 
-setTimeout(()=>{
-petal.remove();
-},6000);
+setTimeout(()=>petal.remove(),6000);
 
 },300);
 
 }
 
-const ringBox = document.getElementById("ringBox");
-const ring = document.getElementById("ring");
-const proposalText = document.getElementById("proposal-text");
-const proposalButtons = document.getElementById("proposal-buttons");
+/* ---------------- LOVE LETTER ---------------- */
 
-if(ringBox){
+const letterBtn=document.getElementById("letter-btn");
+const letter=document.getElementById("love-letter");
+const closeLetter=document.getElementById("close-letter");
 
-ringBox.addEventListener("click", ()=>{
-
-ringBox.classList.add("open");
-
-setTimeout(()=>{
-
-ring.classList.remove("hidden");
-
-const proposalMessage = document.getElementById("proposalMessage");
-
-setTimeout(()=>{
-proposalMessage.classList.remove("hidden");
-proposalMessage.classList.add("show");
-},1000);
-
-/* Sparkle effect */
-createSparkles();
-
-},400);
-
-setTimeout(()=>{
-
-proposalText.classList.remove("hidden");
-
-},900);
-
-setTimeout(()=>{
-
-proposalButtons.classList.remove("hidden");
-
-},1200);
-
+letterBtn.addEventListener("click",()=>{
+letter.classList.remove("hidden");
 });
 
-function createSparkles(){
+closeLetter.addEventListener("click",()=>{
+letter.classList.add("hidden");
+});
 
-const sparkles = document.getElementById("sparkles");
+/* ---------------- INIT ---------------- */
 
-setInterval(()=>{
-
-const star = document.createElement("div");
-
-star.className = "sparkle";
-star.innerHTML = "✨";
-
-star.style.left = Math.random()*100 + "%";
-star.style.top = Math.random()*100 + "%";
-
-sparkles.appendChild(star);
-
-setTimeout(()=>{
-star.remove();
-},1200);
-
-},300);
-
-}
-}
+resize();
+updateScore();
