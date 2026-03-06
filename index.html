@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>For My Love ❤️</title>
+
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="practice.css">
+
+<style>
+
+/* Floating Hearts Background */
+.hearts-bg{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+pointer-events:none;
+overflow:hidden;
+z-index:1;
+}
+
+.heart{
+position:absolute;
+width:20px;
+height:20px;
+background:#ff4d6d;
+transform:rotate(45deg);
+animation:float 8s linear infinite;
+}
+
+.heart:before,
+.heart:after{
+content:'';
+position:absolute;
+width:20px;
+height:20px;
+background:#ff4d6d;
+border-radius:50%;
+}
+
+.heart:before{
+top:-10px;
+left:0;
+}
+
+.heart:after{
+left:-10px;
+top:0;
+}
+
+@keyframes float{
+0%{transform:translateY(100vh) rotate(45deg);opacity:1;}
+100%{transform:translateY(-10vh) rotate(45deg);opacity:0;}
+}
+
+/* Photo Gallery */
+.gallery{
+position:absolute;
+bottom:20px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:15px;
+z-index:5;
+}
+
+.gallery img{
+width:120px;
+height:120px;
+object-fit:cover;
+border-radius:15px;
+box-shadow:0 4px 15px rgba(0,0,0,0.2);
+transition:transform 0.3s;
+}
+
+.gallery img:hover{
+transform:scale(1.1);
+}
+
+</style>
+</head>
+
+<body>
+
+<!-- Romantic Music -->
+<audio autoplay loop>
+<source src="music.mp3" type="audio/mp3">
+</audio>
+
+<!-- Floating Hearts -->
+<div class="hearts-bg">
+
+<div class="heart" style="left:10%; animation-duration:9s;"></div>
+<div class="heart" style="left:20%; animation-duration:7s;"></div>
+<div class="heart" style="left:30%; animation-duration:6s;"></div>
+<div class="heart" style="left:40%; animation-duration:8s;"></div>
+<div class="heart" style="left:50%; animation-duration:5s;"></div>
+<div class="heart" style="left:60%; animation-duration:8s;"></div>
+<div class="heart" style="left:70%; animation-duration:7s;"></div>
+<div class="heart" style="left:80%; animation-duration:8s;"></div>
+
+</div>
+
+<div id="game-container">
+
+<canvas id="gameCanvas"></canvas>
+
+<!-- UI -->
+<div id="ui-layer">
+<div id="score-board">
+❤️ Love Meter
+<div class="progress-bar">
+<div id="love-fill"></div>
+</div>
+</div>
+</div>
+
+<!-- Start Screen -->
+<div id="start-screen" class="screen active">
+
+<h1>Hi My Love ❤️</h1>
+<p>Catch the hearts to fill my love meter!</p>
+
+<button id="start-btn" class="btn">Start Game</button>
+
+</div>
+
+<!-- Proposal Screen -->
+<div id="proposal-screen" class="screen hidden">
+
+<div class="proposal-content">
+
+<h1>“There’s a little surprise for you inside this box 🎁</h1>
+
+<p class="ring-instruction">
+Click the box to open it ✨
+</p>
+
+<!-- Ring Box -->
+<div class="ring-box" id="ringBox">
+
+<div class="box-lid"></div>
+<div class="box-base"></div>
+
+<div class="ring hidden" id="ring">
+💍
+<div id="sparkles"></div>
+</div>
+
+</div>
+
+<h2 id="proposal-text" class="hidden">
+क्या तुम मेरे साथ हमेशा के लिए रहना चाहोगी? 💍❤️
+</h2>
+
+<div id="proposal-buttons" class="buttons hidden">
+<button id="yes-btn" class="btn yes-btn">YES ❤️</button>
+<button id="no-btn" class="btn no-btn">No 🙈</button>
+</div>
+
+</div>
+</div>
+
+<!-- Celebration Screen -->
+<div id="celebration-screen" class="screen hidden">
+
+<div class="celebration-card">
+
+<h1>उसने हाँ कह दिया ❤️ yeahhh🥳🎉”</h1>
+
+<p class="love-message">
+“With you, my world feels brighter, warmer, and more beautiful than ever 💖<br>
+Every moment we share becomes a memory my heart will cherish forever ✨”
+
+</p>
+
+<div class="photo-gallery">
+
+<img src="./chiya1.JPEG" class="memory-photo">
+<img src="./chiya2.JPEG" class="memory-photo">
+<img src="./chiya3.JPEG" class="memory-photo">
+<img src="./chiya4.JPEG" class="memory-photo">
+
+</div>
+
+<button id="letter-btn" class="btn">Open Love Letter 💌</button>
+
+</div>
+
+</div>
+
+<!-- Love Letter Popup -->
+<div id="love-letter" class="letter hidden">
+
+<div class="letter-box">
+
+<h2>My Love ❤️</h2>
+
+<p>
+**“I love hearing your voice, and I always crave your attention 💕
+I could stare at your photos forever 📸✨
+
+tumhari bak-bak, your smile, your childish side, and your romantic side are the little things that make my heart so happy ❤️
+
+And no matter what happens in life, I will always wait for you… forever and always 💍❤️✨”**
+</p>
+
+<button id="close-letter" class="btn">Close</button>
+
+</div>
+
+</div>
+
+
+<!-- Romantic Music -->
+<audio id="romantic-music">
+  <source src="gehrahua.mp3" type="audio/mp3">
+</audio>
+
+
+<!-- Fullscreen Slideshow -->
+<div id="slideshow" class="slideshow hidden">
+
+<img src="./chiya1.JPEG" class="slide">
+<img src="./chiya2.JPEG" class="slide">
+<img src="./chiya3.JPEG" class="slide">
+<img src="./chiya4.JPEG" class="slide">
+
+</div>
+
+<script src="script.js" defer></script>
+
+</body>
+</html>
