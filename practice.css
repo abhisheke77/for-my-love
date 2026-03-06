@@ -849,3 +849,29 @@ opacity:1;
 }
 
 }
+
+/* Fix mobile top text cut */
+
+@media (max-width:768px){
+
+.screen{
+position:absolute;
+top:0;
+left:0;
+width:100%;
+min-height:100vh;
+height:auto;
+
+display:flex;
+flex-direction:column;
+
+justify-content:flex-start;   /* start from top */
+align-items:center;
+
+padding-top:60px;
+padding-bottom:60px;
+
+overflow-y:auto;
+}
+
+}
